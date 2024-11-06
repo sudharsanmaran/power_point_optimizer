@@ -1,22 +1,44 @@
-# import os
+# Standard Library Imports
+import logging
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request
+
+# Third-Party Imports
 from dotenv import load_dotenv
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.responses import JSONResponse
 
+from backend.src.app.schemas.base import CommonResponse
 
 # from Secweb import SecWeb
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
 
-load_dotenv()
+# flake8: noqa
+# Local Application Imports
+from backend.src.app.core.constants import initialize_historical_data
+from backend.src.app.api.v1.review_k_p_i import router
+
+
+logger = logging.getLogger(__name__)
+
+
+def load_environment_variables():
+    if load_dotenv(dotenv_path="backend/.env"):
+        logger.info("Environment variables loaded successfully")
+    else:
+        logger.error("Failed to load environment variables")
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # startup code
-    # 1. load history data csv into df
-    # 2. load ML model if needed
+    load_environment_variables()
+    initialize_historical_data()
     # 3. establish database connection
     # 4. load basic data into database (create/update)
     yield
@@ -59,9 +81,31 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request, exc) -> JSONResponse:
+    if exc.status_code == 500:
+        message = "Internal Server Error"
+    else:
+        message = exc.detail
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "success": False,
+            "message": message,
+        },
+    )
+
+
 app.add_middleware(GZipMiddleware)
+
+app.include_router(router)
 
 
 @app.get("/")
-async def root():
-    return {"message": "application started successfully"}
+async def root() -> CommonResponse:
+    return {
+        "status_code": 200,
+        "success": True,
+        "message": "application started successfully",
+    }

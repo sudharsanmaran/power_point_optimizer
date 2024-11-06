@@ -33,3 +33,4 @@ archive.zip
 
 #### frontend
 backend/.env
+backend/data/historical_data.csv
