@@ -20,7 +20,7 @@ logging.basicConfig(
 
 # flake8: noqa
 # Local Application Imports
-from backend.src.app.core.constants import initialize_historical_data
+from backend.src.app.configs.constants import initialize_historical_data
 from backend.src.app.api.v1.review_k_p_i import router
 
 
@@ -48,7 +48,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Power Point Optimizer", version="1.0.0", lifespan=lifespan
+    title="Power Point Optimizer", version="2.0.0", lifespan=lifespan
 )
 
 

@@ -2,15 +2,15 @@ import logging
 from fastapi import Query
 from fastapi.routing import APIRouter
 
-from backend.src.app.api.api_handler import api_error_handler
-from backend.src.app.core.constants import (
+from backend.src.app.api.api_handlers import api_error_handler
+from backend.src.app.configs.constants import (
     API_SUCCESS_MESSAGE,
     DataForm,
     PerformanceSection,
     LaneType,
 )
 from backend.src.app.schemas.review_k_p_i import Params, Response
-from backend.src.app.services.review_k_p_i import process_review_k_p_i
+from backend.src.app.services.core.review_k_p_i import process_review_k_p_i
 
 
 logger = logging.getLogger(__name__)

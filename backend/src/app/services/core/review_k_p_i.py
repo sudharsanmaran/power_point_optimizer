@@ -2,15 +2,15 @@ from typing import List
 import numpy as np
 import pandas as pd
 
-from backend.src.app.core.constants import (
+from backend.src.app.configs.constants import (
     EVENTS,
+    CONFIGS,
     DataForm,
     LaneType,
     PerformanceSection,
 )
-from backend.src.app.core.errors import EmptyDataError
+from backend.src.app.configs.errors import EmptyDataError
 from backend.src.app.schemas.review_k_p_i import Params
-from backend.src.app.core.constants import CONFIGS
 
 
 async def get_history_df():
@@ -79,7 +79,8 @@ def calculate_average_people_in_line_by_bucket(
     # Define the buckets for categorizing the number of people in line
     buckets = ["1", "3", "5", "7", "9", "11", "> 11"]
 
-    # Create a new column 'Shoppers_BKT' based on the 'avg_num_wait_queue_Nq' values
+    # Create a new column 'Shoppers_BKT' based on
+    # the 'avg_num_wait_queue_Nq' values
     filtered_df["Shoppers_BKT"] = np.select(
         [
             filtered_df["avg_num_wait_queue_Nq"] <= 1,
@@ -133,7 +134,8 @@ def calculate_wait_time_vs_queue_length(
     filtered_df: pd.DataFrame,
 ) -> pd.DataFrame:
     """Calculate and prepare data for the wait time vs. queue length graph."""
-    # Group by hour and type_of_checkout, then calculate the average wait time and queue length
+    # Group by hour and type_of_checkout, then calculate the average wait time
+    # and queue length
     wait_time_vs_queue_data = (
         filtered_df.groupby(["hour", "type_of_checkout"])
         .agg(

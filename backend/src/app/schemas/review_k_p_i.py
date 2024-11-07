@@ -2,7 +2,7 @@ import logging
 from typing import Dict, List, Tuple, Union
 
 from pydantic import BaseModel, field_validator
-from backend.src.app.core.constants import (
+from backend.src.app.configs.constants import (
     DataForm,
     LaneType,
     PerformanceSection,
