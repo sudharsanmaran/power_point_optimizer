@@ -15,7 +15,7 @@ from backend.src.app.services.core.review_k_p_i import process_review_k_p_i
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/performance", tags=["performance"])
+router = APIRouter(prefix="/v1/performance", tags=["performance"])
 
 
 @router.get("/reviewkpi")

@@ -9,7 +9,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
 
-from backend.src.app.schemas.base import CommonResponse
 
 # from Secweb import SecWeb
 
@@ -20,7 +19,8 @@ logging.basicConfig(
 
 # flake8: noqa
 # Local Application Imports
-from backend.src.app.configs.constants import initialize_historical_data
+from backend.src.app.configs.utils import initialize_historical_data_from_cloud
+from backend.src.app.schemas.base import CommonResponse
 from backend.src.app.api.v1.review_k_p_i import router
 
 
@@ -38,7 +38,7 @@ def load_environment_variables():
 async def lifespan(app: FastAPI):
     # startup code
     load_environment_variables()
-    initialize_historical_data()
+    await initialize_historical_data_from_cloud()
     # 3. establish database connection
     # 4. load basic data into database (create/update)
     yield

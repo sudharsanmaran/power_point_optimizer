@@ -14,6 +14,10 @@ from backend.src.app.schemas.review_k_p_i import Params
 
 
 async def get_history_df():
+    if "HISTORICAL_DATA_FRAME" not in CONFIGS:
+        raise EmptyDataError("No data found")
+    if not isinstance(CONFIGS["HISTORICAL_DATA_FRAME"], pd.DataFrame):
+        raise EmptyDataError("Invalid data format")
     return CONFIGS["HISTORICAL_DATA_FRAME"].copy(deep=True)
 
 

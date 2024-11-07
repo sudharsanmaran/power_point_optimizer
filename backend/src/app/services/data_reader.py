@@ -1,8 +1,7 @@
-# import aiofiles
-from io import StringIO
 import pandas as pd
-from azure.storage.blob.aio import BlobServiceClient
 import logging
+
+from backend.src.app.clients.storage.base import StorageClient
 
 logger = logging.getLogger(__name__)
 
@@ -18,24 +17,12 @@ def read_csv(path: str) -> pd.DataFrame:
         return pd.DataFrame()
 
 
-async def read_historical_data_from_azure():
-    try:
-        # Initialize the Azure Blob client
-        blob_service_client = BlobServiceClient.from_connection_string(
-            "your_connection_string"
-        )
-        blob_client = blob_service_client.get_blob_client(
-            container="your_container_name", blob="historical_data.csv"
-        )
+async def read_historical_data_from_cloud(
+    client: StorageClient,
+) -> pd.DataFrame:
+    # Initialize the client
+    await client.initialize_client()
 
-        # Download blob content asynchronously
-        stream = await blob_client.download_blob()
-        file_content = await stream.readall()
-
-        # Convert content to DataFrame
-        df = pd.read_csv(StringIO(file_content.decode("utf-8")))
-        return df
-
-    except Exception as e:
-        print(f"Error reading historical data from Azure: {e}")
-        return None
+    # Read data
+    df = await client.read_historical_data()
+    return df

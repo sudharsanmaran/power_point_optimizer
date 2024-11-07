@@ -1,10 +1,5 @@
 from enum import Enum
 import logging
-from os import getenv
-
-import pandas as pd
-
-from backend.src.app.services.data_reader import read_csv
 
 
 logger = logging.getLogger(__name__)
@@ -36,15 +31,3 @@ class LaneType(Enum):
     SCO_BULLPEN = "SCO Bullpen"
     MANNED_EXPRESS = "Manned Express"
     SCO_INDIVIDUAL = "SCO Individual"
-
-
-def initialize_historical_data() -> None:
-    global CONFIGS
-    if "HISTORICAL_DATA_FRAME" in CONFIGS and isinstance(
-        CONFIGS["HISTORICAL_DATA_FRAME"], pd.DataFrame
-    ):
-        logger.info("Historical data set already initialized")
-        return
-    CONFIGS["HISTORICAL_DATA_FRAME"] = read_csv(getenv("HISTORICAL_DATA_PATH"))
-    logger.info("Historical data set successfully")
-    return
