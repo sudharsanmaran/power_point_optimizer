@@ -233,6 +233,7 @@ async def filter_df(
     if params.total_year_flag:
         filter_mask &= kpi_data["date"]
     if params.october_flag:
+        # todo: typecast while reading the data
         kpi_data["date"] = kpi_data["date"].astype(np.datetime64)
         filter_mask &= kpi_data["date"].dt.month == 10
 
