@@ -3,10 +3,12 @@ import numpy as np
 import pandas as pd
 
 from backend.src.app.core.constants import (
+    EVENTS,
     DataForm,
     LaneType,
     PerformanceSection,
 )
+from backend.src.app.core.errors import EmptyDataError
 from backend.src.app.schemas.review_k_p_i import Params
 from backend.src.app.core.constants import CONFIGS
 
@@ -37,7 +39,9 @@ def calculate_average(data, group_by_cols, target_col, index_labels):
     return pivot_data.replace(np.nan, 0)
 
 
-def calculate_average_wait_time_by_bucket(filtered_df):
+def calculate_average_wait_time_by_bucket(
+    filtered_df: pd.DataFrame,
+) -> pd.DataFrame:
     week_days = get_time_buckets()
     avg_wait_time_data = calculate_average(
         filtered_df,
@@ -48,7 +52,9 @@ def calculate_average_wait_time_by_bucket(filtered_df):
     return avg_wait_time_data
 
 
-def calculate_average_wait_time_by_weekday(filtered_df):
+def calculate_average_wait_time_by_weekday(
+    filtered_df: pd.DataFrame,
+) -> pd.DataFrame:
     week_days = [
         "Monday",
         "Tuesday",
@@ -67,7 +73,9 @@ def calculate_average_wait_time_by_weekday(filtered_df):
     return avg_wait_time_weekday_data
 
 
-def calculate_average_people_in_line_by_bucket(filtered_df):
+def calculate_average_people_in_line_by_bucket(
+    filtered_df: pd.DataFrame,
+) -> pd.DataFrame:
     # Define the buckets for categorizing the number of people in line
     buckets = ["1", "3", "5", "7", "9", "11", "> 11"]
 
@@ -104,7 +112,44 @@ def calculate_average_people_in_line_by_bucket(filtered_df):
     return avg_people_line_data
 
 
-def calculate_average_people_in_line_by_weekday(filtered_df):
+def calculate_average_wait_time_by_hour(
+    filtered_df: pd.DataFrame,
+) -> pd.DataFrame:
+    """Calculate and prepare data for the average wait time by hour graph."""
+    # Group by hour and type_of_checkout, then calculate the average wait time
+    avg_wait_time_hourly_data = (
+        filtered_df.groupby(["hour", "type_of_checkout"])[
+            "avg_waiting_time_Tq"
+        ]
+        .mean()
+        .unstack()
+    )
+    avg_wait_time_hourly_data.reset_index(inplace=True)
+    avg_wait_time_hourly_data = avg_wait_time_hourly_data.fillna(0)
+    return avg_wait_time_hourly_data
+
+
+def calculate_wait_time_vs_queue_length(
+    filtered_df: pd.DataFrame,
+) -> pd.DataFrame:
+    """Calculate and prepare data for the wait time vs. queue length graph."""
+    # Group by hour and type_of_checkout, then calculate the average wait time and queue length
+    wait_time_vs_queue_data = (
+        filtered_df.groupby(["hour", "type_of_checkout"])
+        .agg(
+            avg_wait_time=("avg_waiting_time_Tq", "mean"),
+            avg_queue_length=("avg_num_wait_queue_Nq", "mean"),
+        )
+        .unstack()
+    )
+    wait_time_vs_queue_data.reset_index(inplace=True)
+    wait_time_vs_queue_data = wait_time_vs_queue_data.fillna(0)
+    return wait_time_vs_queue_data
+
+
+def calculate_average_people_in_line_by_weekday(
+    filtered_df: pd.DataFrame,
+) -> pd.DataFrame:
     week_days = [
         "Monday",
         "Tuesday",
@@ -123,9 +168,9 @@ def calculate_average_people_in_line_by_weekday(filtered_df):
     return avg_people_weekday_data
 
 
-async def get_wait_time(filtered_df: pd.DataFrame):
+async def get_wait_time(filtered_df: pd.DataFrame) -> dict:
     if filtered_df.empty:
-        raise ValueError("No data found for the given filters")
+        raise EmptyDataError("No data found for the given filters")
 
     # Dictionary to hold the calculated metrics
     metric_calculations = {
@@ -137,6 +182,8 @@ async def get_wait_time(filtered_df: pd.DataFrame):
         "avg_people_in_line_by_weekday": (
             calculate_average_people_in_line_by_weekday
         ),
+        "avg_wait_time_by_hour": calculate_average_wait_time_by_hour,
+        "wait_time_vs_queue_length": calculate_wait_time_vs_queue_length,
     }
 
     # Calculate metrics and format them as dictionaries
@@ -159,7 +206,7 @@ async def filter_df(
     kpi_data = await get_df()
 
     if kpi_data.empty:
-        raise ValueError("No data found")
+        raise EmptyDataError("No data found")
 
     filter_mask = True
     if params.cluster:
@@ -174,9 +221,9 @@ async def filter_df(
     if params.peak_hour:
         filter_mask &= kpi_data["peak_hour"].isin(params.peak_hour)
     if params.covid_flag:
-        filter_mask &= kpi_data["Covid_Effect"] == params.time_period
+        filter_mask &= kpi_data["Covid_Effect"] == 1
     if params.events_flag:
-        filter_mask &= kpi_data["event"] == params.time_period
+        filter_mask &= kpi_data["event"].isin(EVENTS)
     if params.total_year_flag:
         filter_mask &= kpi_data["date"]
     if params.october_flag:

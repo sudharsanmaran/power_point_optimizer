@@ -11,6 +11,13 @@ logger = logging.getLogger(__name__)
 
 CONFIGS = {}
 API_SUCCESS_MESSAGE = "success"
+EVENTS = [
+    "Halloween",
+    "Thanksgiving",
+    "Christmas",
+    "New Year",
+    "Valentine's Day",
+]
 
 
 class DataForm(Enum):

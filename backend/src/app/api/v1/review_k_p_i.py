@@ -1,8 +1,8 @@
 import logging
-from fastapi import Query, HTTPException
+from fastapi import Query
 from fastapi.routing import APIRouter
-from pydantic import ValidationError
 
+from backend.src.app.api.api_handler import api_error_handler
 from backend.src.app.core.constants import (
     API_SUCCESS_MESSAGE,
     DataForm,
@@ -19,6 +19,7 @@ router = APIRouter(prefix="/performance", tags=["performance"])
 
 
 @router.get("/reviewkpi")
+@api_error_handler
 async def get_review_kpi(
     type: PerformanceSection = Query(
         PerformanceSection.WAIT_TIME, description="Type of KPI"
@@ -54,24 +55,11 @@ async def get_review_kpi(
         "total_year_flag": total_year_flag,
         "time_period": time_period,
     }
-    try:
-        params = Params(**params)
-        data = await process_review_k_p_i(params)
-        return {
-            "success": True,
-            "status_code": 200,
-            "message": API_SUCCESS_MESSAGE,
-            "data": data,
-        }
-
-    except ValueError as e:
-        logger.error(f"Error processing review KPI: {e}")
-        raise HTTPException(status_code=404, detail=str(e))
-
-    except ValidationError as e:
-        logger.error(f"Error validating review KPI params: {e}")
-        raise HTTPException(status_code=400, detail=str(e))
-
-    except Exception as e:
-        logger.error(f"Error processing review KPI: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+    params = Params(**params)
+    data = await process_review_k_p_i(params)
+    return {
+        "success": True,
+        "status_code": 200,
+        "message": API_SUCCESS_MESSAGE,
+        "data": data,
+    }

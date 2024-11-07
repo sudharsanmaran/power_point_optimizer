@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, List, Union
+from typing import Dict, List, Tuple, Union
 
 from pydantic import BaseModel, field_validator
 from backend.src.app.core.constants import (
@@ -49,11 +49,9 @@ class Params(BaseModel):
 
 
 class DFSplitFormat(BaseModel):
-    index: List[
-        Union[int, str]
-    ]  # index can be integers or strings depending on DataFrame
-    columns: List[str]  # column names as strings
-    data: List[List[Union[str, int, float]]]  # each row with mixed data types
+    index: List[Union[int, str]]
+    columns: List[Union[str, Tuple[str, ...]]]
+    data: List[List[Union[str, int, float]]]
 
 
 class Response(CommonResponse):
