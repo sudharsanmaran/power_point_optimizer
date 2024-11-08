@@ -4,7 +4,7 @@ import logging
 from fastapi import HTTPException
 from pydantic import ValidationError
 
-from backend.src.app.configs.errors import EmptyDataError
+from backend.src.app.services.business_services.errors import EmptyDataError
 
 
 logger = logging.getLogger(__name__)

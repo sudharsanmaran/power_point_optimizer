@@ -9,8 +9,10 @@ from backend.src.app.configs.constants import (
     PerformanceSection,
     LaneType,
 )
-from backend.src.app.schemas.review_k_p_i import Params, Response
-from backend.src.app.services.core.review_k_p_i import process_review_k_p_i
+from backend.src.app.schemas.performance_metrics import Params, Response
+from backend.src.app.services.business_services.performance_metrics import (
+    compute_metrics,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -18,7 +20,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/v1/performance", tags=["performance"])
 
 
-@router.get("/reviewkpi")
+@router.get("/metrics")
 @api_error_handler
 async def get_review_kpi(
     type: PerformanceSection = Query(
@@ -56,7 +58,7 @@ async def get_review_kpi(
         "time_period": time_period,
     }
     params = Params(**params)
-    data = await process_review_k_p_i(params)
+    data = await compute_metrics(params)
     return {
         "success": True,
         "status_code": 200,

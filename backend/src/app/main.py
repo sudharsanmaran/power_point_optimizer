@@ -3,7 +3,6 @@ import logging
 from contextlib import asynccontextmanager
 
 # Third-Party Imports
-from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
@@ -19,19 +18,16 @@ logging.basicConfig(
 
 # flake8: noqa
 # Local Application Imports
-from backend.src.app.configs.utils import initialize_historical_data_from_cloud
+from backend.src.app.errors import ImproperlyConfigured
+from backend.src.app.configs.startup import (
+    initialize_historical_data_from_cloud,
+    load_environment_variables,
+)
 from backend.src.app.schemas.base import CommonResponse
-from backend.src.app.api.v1.review_k_p_i import router
+from backend.src.app.api.v1.performance_metrics import router
 
 
 logger = logging.getLogger(__name__)
-
-
-def load_environment_variables():
-    if load_dotenv(dotenv_path="backend/.env"):
-        logger.info("Environment variables loaded successfully")
-    else:
-        logger.error("Failed to load environment variables")
 
 
 @asynccontextmanager

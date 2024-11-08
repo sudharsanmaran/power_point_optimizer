@@ -1,8 +1,10 @@
 import logging
 from os import getenv
+from dotenv import load_dotenv
 import pandas as pd
 from backend.src.app.clients.storage.azure_blob import BlobClientHandler
 from backend.src.app.configs.constants import CONFIGS
+from backend.src.app.errors import ImproperlyConfigured
 from backend.src.app.services.data_reader import (
     read_csv,
     read_historical_data_from_cloud,
@@ -37,3 +39,11 @@ async def initialize_historical_data_from_cloud() -> None:
         return
     logger.error("Failed to initialize historical data set")
     return
+
+
+def load_environment_variables():
+    if load_dotenv(dotenv_path="backend/.env"):
+        logger.info("Environment variables loaded successfully")
+    else:
+        logger.error("Failed to load environment variables")
+        raise ImproperlyConfigured("Failed to load environment variables")
